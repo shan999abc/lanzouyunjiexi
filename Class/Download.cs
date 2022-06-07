@@ -59,12 +59,12 @@ namespace TEST
             }
             return "无法获取正确的链接对象...";
         }
-        internal static async Task<string> 蓝奏云文件夹解析(string Content, string password = null)
+        internal static async Task<string> 蓝奏云文件夹解析(string Content, string password = "")
         {
             using (Web Web = new Web())
             {
                 string page = await Web.Client.DownloadStringTaskAsync(Content);
-                if (password == null)
+                if (password == "")
                 {
                     string t = new Regex("(?<='t':)(.*)(?=,)").Match(page).Value;
                     string k = new Regex("(?<='k':)(.*)(?=,)").Match(page).Value;
@@ -89,7 +89,7 @@ namespace TEST
                         return text;
                     }
                 }
-                if (password != null)
+                if (password != "")
                 {
                     string t = new Regex("(?<='t':)(.*)(?=,)").Match(page).Value;
                     string k = new Regex("(?<='k':)(.*)(?=,)").Match(page).Value;
@@ -118,12 +118,12 @@ namespace TEST
             }
         }
         
-        internal static async Task<string> 蓝奏云直链解析(string Content , string password = null)
+        internal static async Task<string> 蓝奏云直链解析(string Content , string password = "")
         {
             using (Web Web = new Web())
             {
                 string page = await Web.Client.DownloadStringTaskAsync(Content);
-                if (password == null)
+                if (password == "")
                 {
                     string fn = null;
                     foreach (Match src in new Regex("/fn[^\"]+").Matches(page))
@@ -145,7 +145,7 @@ namespace TEST
                         return Get(js.Dom + "/file/" + js.Url);
                     }
                 }
-                else if(password != null)
+                else if(password != "")
                 {
                     string data = new Regex("(?<=data : ')(.*)(?=')").Match(page).Value + password;
                     byte[] postdata = Encoding.UTF8.GetBytes(data);
