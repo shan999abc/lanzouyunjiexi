@@ -31,15 +31,7 @@ namespace TEST
             }
             catch (Exception ex)
             {
-                if (ex.HResult == -2146233079)
-                {
-                    textbox1.Text = "密码不正确...";
-                }
-                else
-                {
-                    textbox1.Text = ex.Message;
-                }
-                
+                textbox1.Text = ex.Message;
             }
         }
     }

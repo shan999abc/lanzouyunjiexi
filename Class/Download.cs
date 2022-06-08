@@ -1,6 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Newtonsoft.Json.Linq;
 using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -10,27 +9,6 @@ namespace TEST
 {
     internal class Download
     {
-        public class LanzouJson
-        {
-            public string Dom { get; set; }
-            public string Url { get; set; }
-        }
-        public class Text
-        {
-            public string Icon { get; set; }
-            public string T { get; set; }
-            public string Id { get; set; }
-            public string Name_all { get; set; }
-            public string Size { get; set; }
-            public string Time { get; set; }
-            public string Duan { get; set; }
-            public string P_ico { get; set; }
-        }
-
-        public class LanzouJsonFilelist
-        {
-            public List<Text> Text { get; set; }
-        }
         internal static string Get(string link)
         {
             string temp;
@@ -78,18 +56,24 @@ namespace TEST
                     Web.Client.Headers[HttpRequestHeader.Referer] = Content;
                     Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
                     byte[] responseData = await Web.Client.UploadDataTaskAsync("https://lanzoux.com/filemoreajax.php", "POST", postdata);
-                    LanzouJsonFilelist js = JsonConvert.DeserializeObject<LanzouJsonFilelist>(Encoding.UTF8.GetString(responseData));
-                    if (js != null)
+                    JObject js = JObject.Parse(Encoding.UTF8.GetString(responseData));
+                    if (js["zt"].ToString() == "1")
                     {
+                        JArray array = JArray.Parse(js["text"].ToString());
                         string text = null;
-                        for (int i = 0; i < js.Text.Count; i++)
+                        for (int i = 0; i < array.Count; i++)
                         {
-                            text += "链接：https://www.lanzoux.com/" + js.Text[i].Id + "\n" + "文件名：" + js.Text[i].Name_all + "\n" + "大小：" + js.Text[i].Size + "\n" + "上传时间：" + js.Text[i].Time + "\n";
+                            JObject js1 = JObject.Parse(array[i].ToString());
+                            text += $"链接：https://www.lanzoux.com/{js1["id"]}\n文件名：{js1["name_all"]}\n大小：{js1["size"]}\n上传时间：{js1["time"]}\n";
                         }
                         return text;
                     }
+                    else
+                    {
+                        return "错误：" + js["info"].ToString();
+                    }
                 }
-                if (password != "")
+                else if (password != "")
                 {
                     string t = new Regex("(?<='t':)(.*)(?=,)").Match(page).Value;
                     string k = new Regex("(?<='k':)(.*)(?=,)").Match(page).Value;
@@ -103,15 +87,21 @@ namespace TEST
                     Web.Client.Headers[HttpRequestHeader.Referer] = Content;
                     Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
                     byte[] responseData = await Web.Client.UploadDataTaskAsync("https://lanzoux.com/filemoreajax.php", "POST", postdata);
-                    LanzouJsonFilelist js = JsonConvert.DeserializeObject<LanzouJsonFilelist>(Encoding.UTF8.GetString(responseData));
-                    if (js != null)
+                    JObject js = JObject.Parse(Encoding.UTF8.GetString(responseData));
+                    if (js["zt"].ToString() == "1")
                     {
+                        JArray array = JArray.Parse(js["text"].ToString());
                         string text = null;
-                        for (int i = 0; i < js.Text.Count; i++)
+                        for (int i = 0; i < array.Count; i++)
                         {
-                            text += "链接：https://www.lanzoux.com/" + js.Text[i].Id + "\n" + "文件名：" + js.Text[i].Name_all + "\n" + "大小：" + js.Text[i].Size + "\n" + "上传时间：" + js.Text[i].Time + "\n";
+                            JObject js1 = JObject.Parse(array[i].ToString());
+                            text += $"链接：https://www.lanzoux.com/{js1["id"]}\n文件名：{js1["name_all"]}\n大小：{js1["size"]}\n上传时间：{js1["time"]}\n";
                         }
                         return text;
+                    }
+                    else
+                    {
+                        return "错误：" + js["info"].ToString();
                     }
                 }
                 return "蓝奏云文件夹解析失败...";
@@ -123,40 +113,55 @@ namespace TEST
             using (Web Web = new Web())
             {
                 string page = await Web.Client.DownloadStringTaskAsync(Content);
-                if (password == "")
+                if (!new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(page).Success)
                 {
-                    string fn = null;
-                    foreach (Match src in new Regex("/fn[^\"]+").Matches(page))
+                    if (password == "")
                     {
-                        if (src.Length > 10)
+                        string fn = null;
+                        foreach (Match src in new Regex("/fn[^\"]+").Matches(page))
                         {
-                            fn = "https://www.lanzoux.com" + src.Value;
+                            if (src.Length > 10)
+                            {
+                                fn = "https://www.lanzoux.com" + src.Value;
+                            }
+                        }
+                        string page1 = await Web.Client.DownloadStringTaskAsync(fn);
+                        string data = $"action=downprocess&signs=?ctdf&sign={new Regex("(?<=sign':')(.*)(?=',)").Match(page1).Value}&ves=1&websign=&websignkey=aNA1";
+                        byte[] postdata = Encoding.UTF8.GetBytes(data);
+                        Web.Client.Headers[HttpRequestHeader.Referer] = Content;
+                        Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
+                        JObject js = JObject.Parse(Encoding.UTF8.GetString(responseData));
+                        if (js["zt"].ToString() == "1")
+                        {
+                            return Get($"{js["dom"]}/file/{js["url"]}");
+                        }
+                        else
+                        {
+                            return "错误：" + js["inf"].ToString();
                         }
                     }
-                    string page1 = await Web.Client.DownloadStringTaskAsync(fn);
-                    string data = $"action=downprocess&signs=?ctdf&sign={new Regex("(?<=sign':')(.*)(?=',)").Match(page1).Value}&ves=1&websign=&websignkey=aNA1";
-                    byte[] postdata = Encoding.UTF8.GetBytes(data);
-                    Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                    Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
-                    LanzouJson js = JsonConvert.DeserializeObject<LanzouJson>(Encoding.UTF8.GetString(responseData));
-                    if (js != null)
+                    else if (password != "")
                     {
-                        return Get(js.Dom + "/file/" + js.Url);
+                        string data = new Regex("(?<=data : ')(.*)(?=')").Match(page).Value + password;
+                        byte[] postdata = Encoding.UTF8.GetBytes(data);
+                        Web.Client.Headers[HttpRequestHeader.Referer] = Content;
+                        Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                        byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
+                        JObject js = JObject.Parse(Encoding.UTF8.GetString(responseData));
+                        if (js["zt"].ToString() == "1")
+                        {
+                            return Get($"{js["dom"]}/file/{js["url"]}");
+                        }
+                        else
+                        {
+                            return "错误：" + js["inf"].ToString();
+                        }
                     }
                 }
-                else if(password != "")
+                else
                 {
-                    string data = new Regex("(?<=data : ')(.*)(?=')").Match(page).Value + password;
-                    byte[] postdata = Encoding.UTF8.GetBytes(data);
-                    Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                    Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
-                    LanzouJson js = JsonConvert.DeserializeObject<LanzouJson>(Encoding.UTF8.GetString(responseData));
-                    if (js != null)
-                    {
-                        return Get(js.Dom + "/file/" + js.Url);
-                    }
+                    return $"错误：{new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(page).Value}";
                 }
                 return "蓝奏云直链解析失败...";
             }
