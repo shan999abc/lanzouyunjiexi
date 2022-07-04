@@ -10,32 +10,20 @@ namespace TEST
 {
     internal class Download
     {
-        public  class LanzouJson
-        {
-            public string zt { get; set; }
-            public string dom { get; set; }
-            public string url { get; set; }
-            public string inf { get; set; }
-        }
-        public class LanzouJsonDlist
+        public class LanzouJsonFolderList
         {
             public string id { get; set; }
             public string name_all { get; set; }
             public string size { get; set; }
             public string time { get; set; }
         }
-        public class LanzouJsonD
+        public class LanzouJsonFolder
         {
             public string zt { get; set; }
             public string info { get; set; }
-            public List<LanzouJsonDlist> text { get; set; }
+            public List<LanzouJsonFolderList> text { get; set; }
         }
-        public class LanzouJsonDE
-        {
-            public string zt { get; set; }
-            public string info { get; set; }
-            public string text { get; set; }
-        }
+
         internal static string Get(string link)
         {
             string temp;
@@ -69,7 +57,6 @@ namespace TEST
             using (Web Web = new Web())
             {
                 string page = await Web.Client.DownloadStringTaskAsync(Content);
-                JavaScriptSerializer js = new JavaScriptSerializer();
                 if (password == "")
                 {
                     string t = new Regex("(?<='t':)(.*)(?=,)").Match(page).Value;
@@ -88,7 +75,7 @@ namespace TEST
                     {
                         try
                         {
-                            LanzouJsonD jsobj = js.Deserialize<LanzouJsonD>(Encoding.UTF8.GetString(responseData));
+                            var jsobj = new JavaScriptSerializer().Deserialize<LanzouJsonFolder>(Encoding.UTF8.GetString(responseData));
                             if (jsobj.zt == "1")
                             {
                                 string text = null;
@@ -101,10 +88,10 @@ namespace TEST
                         }
                         catch
                         {
-                            LanzouJsonDE jsobj = js.Deserialize<LanzouJsonDE>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt != "1")
+                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
+                            if (jsobj["zt"] != "1")
                             {
-                                return "错误：" + jsobj.info;
+                                return "错误：" + jsobj["info"];
                             }
                         }
                     }
@@ -127,7 +114,7 @@ namespace TEST
                     {
                         try
                         {
-                            LanzouJsonD jsobj = js.Deserialize<LanzouJsonD>(Encoding.UTF8.GetString(responseData));
+                            var jsobj = new JavaScriptSerializer().Deserialize<LanzouJsonFolder>(Encoding.UTF8.GetString(responseData));
                             if (jsobj.zt == "1")
                             {
                                 string text = null;
@@ -140,10 +127,10 @@ namespace TEST
                         }
                         catch
                         {
-                            LanzouJsonDE jsobj = js.Deserialize<LanzouJsonDE>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt != "1")
+                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
+                            if (jsobj["zt"] != "1")
                             {
-                                return "错误：" + jsobj.info;
+                                return "错误：" + jsobj["info"];
                             }
                         }
                         
@@ -160,7 +147,6 @@ namespace TEST
                 string page = await Web.Client.DownloadStringTaskAsync(Content);
                 if (!new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(page).Success)
                 {
-                    JavaScriptSerializer js = new JavaScriptSerializer();
                     if (password == "")
                     {
                         string fn = null;
@@ -171,8 +157,7 @@ namespace TEST
                                 fn = "https://www.lanzoux.com" + src.Value;
                             }
                         }
-                        string page0 = await Web.Client.DownloadStringTaskAsync(fn);
-                        string page1 = Regex.Replace(page0, @"^\s*//[\s\S]*?$", "", RegexOptions.Multiline);
+                        string page1 = Regex.Replace(await Web.Client.DownloadStringTaskAsync(fn), "^\\s*//[\\s\\S]*?$", "", RegexOptions.Multiline);
                         string data = new Regex("(?<=data : { ')(.*)(?=},)").Match(page1).Value.Replace("'", "").Replace(",", "&").Replace(":", "=")
                         .Replace("signs=ajaxdata", $"signs={new Regex("(?<=ajaxdata = ')(.*)(?=';)").Match(page1).Value}")
                         .Replace("websignkey=websignkey", $"websignkey={new Regex("(?<=websignkey = ')(.*)(?=';)").Match(page1).Value}")
@@ -183,12 +168,12 @@ namespace TEST
                         byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
                         if (Encoding.UTF8.GetString(responseData) != "")
                         {
-                            LanzouJson jsobj = js.Deserialize<LanzouJson>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt == "1")
+                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
+                            if (jsobj["zt"] == "1")
                             {
-                                return Get(jsobj.dom + "/file/" + jsobj.url);
+                                return Get(jsobj["dom"] + "/file/" + jsobj["url"]);
                             }
-                            return "错误：" + jsobj.inf;
+                            return "错误：" + jsobj["inf"];
                         }
                     }
                     else if (password != "")
@@ -200,12 +185,12 @@ namespace TEST
                         byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
                         if (Encoding.UTF8.GetString(responseData) != "")
                         {
-                            LanzouJson jsobj = js.Deserialize<LanzouJson>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt == "1")
+                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
+                            if (jsobj["zt"] == "1")
                             {
-                                return Get(jsobj.dom + "/file/" + jsobj.url);
+                                return Get(jsobj["dom"] + "/file/" + jsobj["url"]);
                             }
-                            return "错误：" + jsobj.inf;
+                            return "错误：" + jsobj["inf"];
                         }
                     }
                 }
