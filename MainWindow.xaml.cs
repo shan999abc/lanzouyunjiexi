@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Windows;
-using System.Web.Script.Serialization;
 
 namespace TEST
 {
@@ -20,7 +19,7 @@ namespace TEST
         }
         private void Window_ContentRendered(object sender, EventArgs e)
         {
-
+            
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)

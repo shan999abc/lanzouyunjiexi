@@ -157,11 +157,8 @@ namespace TEST
                                 fn = "https://www.lanzoux.com" + src.Value;
                             }
                         }
-                        string page1 = Regex.Replace(await Web.Client.DownloadStringTaskAsync(fn), "^\\s*//[\\s\\S]*?$", "", RegexOptions.Multiline);
-                        string data = new Regex("(?<=data : { ')(.*)(?=},)").Match(page1).Value.Replace("'", "").Replace(",", "&").Replace(":", "=")
-                        .Replace("signs=ajaxdata", $"signs={new Regex("(?<=ajaxdata = ')(.*)(?=';)").Match(page1).Value}")
-                        .Replace("websignkey=websignkey", $"websignkey={new Regex("(?<=websignkey = ')(.*)(?=';)").Match(page1).Value}")
-                        .Replace("websign=websign", $"websign={new Regex("(?<=websign = ')(.*)(?=';)").Match(page1).Value}");
+                        string page1 = await Web.Client.DownloadStringTaskAsync(fn);
+                        string data = $"action=downprocess&sign={new Regex("[0-9a-zA-Z_]{70,}_c_c").Match(page1).Value}&ves=1";
                         byte[] postdata = Encoding.UTF8.GetBytes(data);
                         Web.Client.Headers[HttpRequestHeader.Referer] = Content;
                         Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
@@ -178,7 +175,7 @@ namespace TEST
                     }
                     else if (password != "")
                     {
-                        string data = new Regex("(?<=data : ')(.*)(?=')").Match(page).Value + password;
+                        string data = $"action=downprocess&sign={new Regex("[0-9a-zA-Z_]{70,}_c_c").Match(page).Value}&ves=1&p={password}";
                         byte[] postdata = Encoding.UTF8.GetBytes(data);
                         Web.Client.Headers[HttpRequestHeader.Referer] = Content;
                         Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
