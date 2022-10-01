@@ -6,7 +6,7 @@
         mc:Ignorable="d"
         Title="蓝奏云解析DEMO-Made By: Godwhite" Height="450" Width="800" ContentRendered="Window_ContentRendered" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TextBox x:Name="textbox1" HorizontalAlignment="Left" Margin="15,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="310" Width="755" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5">
+        <TextBox x:Name="textbox1" HorizontalAlignment="Left" Margin="15,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="310" Width="755" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible">
             <TextBox.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>
@@ -17,7 +17,7 @@
             </TextBox.RenderTransform>
         </TextBox>
         <Button x:Name="button" Content="开始解析" HorizontalAlignment="Left" Margin="640,26,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click"/>
-        <TextBox x:Name="textbox2" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Text="https://lanzoux.com/iMwXP07mmbra&amp;pwd=123">
+        <TextBox x:Name="textbox2" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Text="https://www.lanzouj.com/ibIPI0cg2y2h&amp;pwd=123">
             <TextBox.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform/>

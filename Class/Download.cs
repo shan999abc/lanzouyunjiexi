@@ -24,17 +24,6 @@ namespace TEST
             public List<LanzouJsonFolderList> text { get; set; }
         }
 
-        internal static string Get(string link)
-        {
-            string temp;
-            HttpWebRequest x = (HttpWebRequest)WebRequest.Create(link);
-            x.Timeout = 3000;
-            x.Headers[HttpRequestHeader.AcceptLanguage] = "zh-CN,zh;q=0.9";
-            x.AllowAutoRedirect = false;
-            temp = x.GetResponse().Headers["Location"];
-            x.Abort();
-            return temp;
-        }
         internal static async Task<string> 关键字解析(string link)
         {
             if (link.Contains("mail.qq"))
@@ -43,16 +32,61 @@ namespace TEST
             }
             else if (link.Contains("lanzou"))
             {
-                string password = new Regex($"(?<=&pwd=).+").Match(link).Value;
+                string domain = "https://" + new Regex("(\\w*\\.){2}\\w*").Match(link).Value;
+                string password = new Regex("(?<=&pwd=).*").Match(link).Value;
                 if (link.EndsWith("&folder"))
                 {
-                    return await 蓝奏云文件夹解析(link.Replace($"&pwd={password}","").Replace("&folder",""),password.Replace("&folder",""));
+                    return await 蓝奏云文件夹解析(domain, link.Replace($"&pwd={password}", "").Replace("&folder", ""), password.Replace("&folder", ""));
                 }
-                return await 蓝奏云直链解析(link.Replace($"&pwd={password}",""),password);
+                return await 蓝奏云直链解析(domain, link.Replace($"&pwd={password}", ""), password);
             }
             return "无法获取正确的链接对象...";
         }
-        internal static async Task<string> 蓝奏云文件夹解析(string Content, string password = "")
+        
+        internal static async Task<string> 蓝奏云直链解析(string domain ,string Content , string password = "")
+        {
+            using (Web Web = new Web())
+            {
+                string page = await Web.Client.DownloadStringTaskAsync(Content);
+                if (Msg(page, true) != "True")
+                {
+                    if (password == "")
+                    {
+                        string fn = null;
+                        foreach (Match src in new Regex("/fn[^\"]*").Matches(page))
+                        {
+                            if (src.Length > 10)
+                            {
+                                fn = domain + src.Value;
+                            }
+                        }
+                        string page1 = await Web.Client.DownloadStringTaskAsync(fn);
+                        string data = $"action=downprocess&sign={new Regex("\\w*_c_c").Match(page1).Value}&ves=1";
+                        string responseData = await UploadData(Content, $"{domain}/ajaxm.php", Encoding.UTF8.GetBytes(data));
+                        if (responseData != "")
+                        {
+                            return await JsonDeserialize(responseData);
+                        }
+                    }
+                    else if (password != "")
+                    {
+                        string data = $"action=downprocess&sign={new Regex("\\w*_c_c").Match(page).Value}&ves=1&p={password}";
+                        byte[] postdata = Encoding.UTF8.GetBytes(data);
+                        string responseData = await UploadData(Content, $"{domain}/ajaxm.php", postdata);
+                        if (responseData != "")
+                        {
+                            return await JsonDeserialize(responseData);
+                        }
+                    }
+                }
+                else
+                {
+                    return $"错误：{Msg(page)}";
+                }
+                return "蓝奏云直链解析失败...";
+            }
+        }
+        internal static async Task<string> 蓝奏云文件夹解析(string domain, string Content, string password = "")
         {
             using (Web Web = new Web())
             {
@@ -67,33 +101,10 @@ namespace TEST
                     string t1 = new Regex($"(?<={t} = ')(.*)(?=')").Match(page).Value;
                     string k1 = new Regex($"(?<={k} = ')(.*)(?=')").Match(page).Value;
                     string data = $"lx={lx}&fid={fid}&uid={uid}&pg=1&rep=0&t={t1}&k={k1}&up=1&vip=0&webfoldersign=";
-                    byte[] postdata = Encoding.UTF8.GetBytes(data);
-                    Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                    Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    byte[] responseData = await Web.Client.UploadDataTaskAsync("https://lanzoux.com/filemoreajax.php", "POST", postdata);
-                    if (Encoding.UTF8.GetString(responseData) != "")
+                    string responseData = await UploadData(Content, $"{domain}/filemoreajax.php", Encoding.UTF8.GetBytes(data));
+                    if (responseData != "")
                     {
-                        try
-                        {
-                            var jsobj = new JavaScriptSerializer().Deserialize<LanzouJsonFolder>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt == "1")
-                            {
-                                string text = null;
-                                for (int i = 0; i < jsobj.text.Count; i++)
-                                {
-                                    text += $"链接：https://www.lanzoux.com/{jsobj.text[i].id}\n文件名：{jsobj.text[i].name_all}\n大小：{jsobj.text[i].size}\n上传时间：{jsobj.text[i].time}\n";
-                                }
-                                return text;
-                            }
-                        }
-                        catch
-                        {
-                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj["zt"] != "1")
-                            {
-                                return "错误：" + jsobj["info"];
-                            }
-                        }
+                        return await JsonDeserializexFolder(domain, responseData);
                     }
                 }
                 else if (password != "")
@@ -106,96 +117,13 @@ namespace TEST
                     string t1 = new Regex($"(?<={t} = ')(.*)(?=')").Match(page).Value;
                     string k1 = new Regex($"(?<={k} = ')(.*)(?=')").Match(page).Value;
                     string data = $"lx={lx}&fid={fid}&uid={uid}&pg=1&rep=0&t={t1}&k={k1}&up=1&ls=1&pwd={password}";
-                    byte[] postdata = Encoding.UTF8.GetBytes(data);
-                    Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                    Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                    byte[] responseData = await Web.Client.UploadDataTaskAsync("https://lanzoux.com/filemoreajax.php", "POST", postdata);
-                    if (Encoding.UTF8.GetString(responseData) != "")
+                    string responseData = await UploadData(Content, $"{domain}/filemoreajax.php", Encoding.UTF8.GetBytes(data));
+                    if (responseData != "")
                     {
-                        try
-                        {
-                            var jsobj = new JavaScriptSerializer().Deserialize<LanzouJsonFolder>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj.zt == "1")
-                            {
-                                string text = null;
-                                for (int i = 0; i < jsobj.text.Count; i++)
-                                {
-                                    text += $"链接：https://www.lanzoux.com/{jsobj.text[i].id}\n文件名：{jsobj.text[i].name_all}\n大小：{jsobj.text[i].size}\n上传时间：{jsobj.text[i].time}\n";
-                                }
-                                return text;
-                            }
-                        }
-                        catch
-                        {
-                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj["zt"] != "1")
-                            {
-                                return "错误：" + jsobj["info"];
-                            }
-                        }
-                        
+                        return await JsonDeserializexFolder(domain, responseData);
                     }
                 }
                 return "蓝奏云文件夹解析失败...";
-            }
-        }
-        
-        internal static async Task<string> 蓝奏云直链解析(string Content , string password = "")
-        {
-            using (Web Web = new Web())
-            {
-                string page = await Web.Client.DownloadStringTaskAsync(Content);
-                if (!new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(page).Success)
-                {
-                    if (password == "")
-                    {
-                        string fn = null;
-                        foreach (Match src in new Regex("/fn[^\"]+").Matches(page))
-                        {
-                            if (src.Length > 10)
-                            {
-                                fn = "https://www.lanzoux.com" + src.Value;
-                            }
-                        }
-                        string page1 = await Web.Client.DownloadStringTaskAsync(fn);
-                        string data = $"action=downprocess&sign={new Regex("[0-9a-zA-Z_]{70,}_c_c").Match(page1).Value}&ves=1";
-                        byte[] postdata = Encoding.UTF8.GetBytes(data);
-                        Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                        Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                        byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
-                        if (Encoding.UTF8.GetString(responseData) != "")
-                        {
-                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj["zt"] == "1")
-                            {
-                                return Get(jsobj["dom"] + "/file/" + jsobj["url"]);
-                            }
-                            return "错误：" + jsobj["inf"];
-                        }
-                    }
-                    else if (password != "")
-                    {
-                        string data = $"action=downprocess&sign={new Regex("[0-9a-zA-Z_]{70,}_c_c").Match(page).Value}&ves=1&p={password}";
-                        byte[] postdata = Encoding.UTF8.GetBytes(data);
-                        Web.Client.Headers[HttpRequestHeader.Referer] = Content;
-                        Web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
-                        byte[] responseData = await Web.Client.UploadDataTaskAsync("https://www.lanzoux.com/ajaxm.php", "POST", postdata);
-                        if (Encoding.UTF8.GetString(responseData) != "")
-                        {
-                            Dictionary<string, string> jsobj = new JavaScriptSerializer().Deserialize<Dictionary<string, string>>(Encoding.UTF8.GetString(responseData));
-                            if (jsobj["zt"] == "1")
-                            {
-                                return Get(jsobj["dom"] + "/file/" + jsobj["url"]);
-                            }
-                            return "错误：" + jsobj["inf"];
-                        }
-                    }
-                }
-                else
-                {
-                    return $"错误：{new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(page).Value}";
-                }
-                return "蓝奏云直链解析失败...";
             }
         }
         internal static async Task<string> QQ邮箱直链解析(string Content)
@@ -212,6 +140,91 @@ namespace TEST
                 }
                 return "QQ邮箱直链解析失败...";
             }
+        }
+
+        private static async Task<string> Get(string link)
+        {
+            return await Task.Run(delegate
+            {
+                string temp;
+                HttpWebRequest x = (HttpWebRequest)WebRequest.Create(link);
+                x.Proxy = null;
+                x.Timeout = 20000;
+                x.Headers[HttpRequestHeader.AcceptLanguage] = "zh-CN,zh;q=0.9";
+                x.AllowAutoRedirect = false;
+                temp = x.GetResponse().Headers["Location"];
+                x.Abort();
+                return temp;
+            });
+        }
+
+        private static string Msg(string msg, bool m = false)
+        {
+            if (m)
+            {
+                return new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(msg).Success.ToString();
+            }
+            return new Regex("(?<=<div class=\"off\"><div class=\"off0\"><div class=\"off1\"></div></div>)(.*)(?=</div>)").Match(msg).Value;
+        }
+
+        private static async Task<string> UploadData(string Referer, string address, byte[] postdata)
+        {
+            using (Web web = new Web())
+            {
+                web.Client.Headers[HttpRequestHeader.Referer] = Referer;
+                web.Client.Headers[HttpRequestHeader.ContentType] = "application/x-www-form-urlencoded";
+                return Encoding.UTF8.GetString(await web.Client.UploadDataTaskAsync(address, "POST", postdata));
+            }
+        }
+
+        private static async Task<string> JsonDeserialize(string responseData)
+        {
+            Dictionary<string, string> obj= Json.Deserialize<Dictionary<string, string>>(responseData);
+            if (obj["zt"] == "1")
+            {
+                return await Get(obj["dom"] + "/file/" + obj["url"]);
+            }
+            return "错误：" + obj["inf"];
+        }
+        private static async Task<string> JsonDeserializexFolder(string domain, string responseData)
+        {
+            return await Task.Run(delegate
+            {
+
+                string result = "";
+                try
+                {
+                    var obj = Json.Deserialize<LanzouJsonFolder>(responseData);
+                    if (obj.zt == "1")
+                    {
+                        string text = null;
+                        for (int i = 0; i < obj.text.Count; i++)
+                        {
+                            text += $"文件名：{obj.text[i].name_all}\n大小：{obj.text[i].size}\n上传时间：{obj.text[i].time}\n链接：{domain}/{obj.text[i].id}\n\n------------------------------------\n\n";
+                        }
+                        result = text;
+                    }
+                }
+                catch
+                {
+                    Dictionary<string, string> jsobj = Json.Deserialize<Dictionary<string, string>>(responseData);
+                    if (jsobj["zt"] != "1")
+                    {
+                        result = "错误：" + jsobj["info"];
+                    }
+                }
+                return result;
+
+            });
+        }
+
+    }
+    internal class Json
+    {
+        static readonly JavaScriptSerializer JavaScriptSerializer = new JavaScriptSerializer();
+        internal static T Deserialize<T>(string JsonText)
+        {
+            return JavaScriptSerializer.Deserialize<T>(JsonText);
         }
     }
     public class Web : IDisposable
