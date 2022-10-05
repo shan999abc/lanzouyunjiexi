@@ -161,9 +161,7 @@ namespace TEST
         }
         private static string JsonDeserializexFolder(string domain, string responseData)
         {
-            string result = "";
             dynamic lanzouJsonFolder = Json.DeserializeObject(responseData);
-
             if ($"{lanzouJsonFolder["zt"]}" == "1")
             {
                 string files = null;
@@ -171,13 +169,9 @@ namespace TEST
                 {
                     files += $"文件名：{lanzouJsonFolder["text"][i]["name_all"]}\n大小：{lanzouJsonFolder["text"][i]["size"]}\n上传时间：{lanzouJsonFolder["text"][i]["time"]}\n链接：{domain}/{lanzouJsonFolder["text"][i]["id"]}\n\n------------------------------------\n\n";
                 }
-                result = files;
+                return files;
             }
-            else if($"{lanzouJsonFolder["zt"]}" != "1")
-            {
-                result = $"错误：{lanzouJsonFolder["info"]}";
-            }
-            return result;
+            return $"错误：{lanzouJsonFolder["info"]}";
         }
 
     }
