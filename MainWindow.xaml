@@ -1,32 +1,31 @@
-﻿<Window x:Class="TEST.MainWindow"
+﻿<Window x:Class="TEST.MainWindow" 
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="蓝奏云解析DEMO-Made By: Godwhite" Height="450" Width="800" ContentRendered="Window_ContentRendered" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="蓝奏云解析DEMO-Made By: Godwhite" Height="450" Width="800" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
-        <TextBox x:Name="textbox1" HorizontalAlignment="Left" Margin="15,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="310" Width="755" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible">
-            <TextBox.RenderTransform>
+        <TextBox Name="textbox1" HorizontalAlignment="Left" Margin="15,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="310" Width="755" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="#FF966496" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible" Background="{x:Null}">
+            <UIElement.RenderTransform>
                 <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform AngleY="-0.158"/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="-0.626"/>
+                    <ScaleTransform />
+                    <SkewTransform AngleY="-0.158" />
+                    <RotateTransform />
+                    <TranslateTransform Y="-0.626" />
                 </TransformGroup>
-            </TextBox.RenderTransform>
+            </UIElement.RenderTransform>
         </TextBox>
-        <Button x:Name="button" Content="开始解析" HorizontalAlignment="Left" Margin="640,26,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click"/>
-        <TextBox x:Name="textbox2" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" Background="{x:Null}" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="Red" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Text="https://www.lanzouj.com/ibIPI0cg2y2h&amp;pwd=123">
-            <TextBox.RenderTransform>
+        <Button Name="button" Content="开始解析" HorizontalAlignment="Left" Margin="640,26,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click" />
+        <TextBox Name="textbox2" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" TextAlignment="Left" FontSize="16" FontWeight="Normal" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Text="https://www.lanzouj.com/ibIPI0cg2y2h&amp;pwd=123" Foreground="#FFDC32DC" Background="{x:Null}">
+            <UIElement.RenderTransform>
                 <TransformGroup>
-                    <ScaleTransform/>
-                    <SkewTransform AngleY="-0.158"/>
-                    <RotateTransform/>
-                    <TranslateTransform Y="-0.626"/>
+                    <ScaleTransform />
+                    <SkewTransform AngleY="-0.158" />
+                    <RotateTransform />
+                    <TranslateTransform Y="-0.626" />
                 </TransformGroup>
-            </TextBox.RenderTransform>
+            </UIElement.RenderTransform>
         </TextBox>
-
     </Grid>
 </Window>

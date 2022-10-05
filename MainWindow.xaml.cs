@@ -8,25 +8,16 @@ namespace TEST
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static MainWindow Instance { get; private set; }
         public MainWindow()
         {
-            if (Instance == null)
-            {
-                Instance = this;
-            }
             InitializeComponent();
         }
-        private void Window_ContentRendered(object sender, EventArgs e)
-        {
-            
-        }
-
         private async void Button_Click(object sender, RoutedEventArgs e)
         {
             try
             {
                 textbox1.Text = await Download.关键字解析(textbox2.Text);
+                textbox1.ScrollToHome();
             }
             catch (Exception ex)
             {
