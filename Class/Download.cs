@@ -35,15 +35,7 @@ namespace TEST
             {
                 if (password == "")
                 {
-                    string fn = null;
-                    foreach (Match link in Regex.Matches(page, "/fn\\?\\w*"))
-                    {
-                        if (link.Length > 10)
-                        {
-                            fn = domain + link.Value;
-                        }
-                    }
-                    string data = $"action=downprocess&sign={Regex.Match(await DownloadString(fn), "\\w*_c_c").Value}&ves=1";
+                    string data = $"action=downprocess&sign={RegexAll(await DownloadString(domain + RegexAll(page, "/fn[^\"]+")), "\\w*_c")}&ves=1";
                     string responseData = await UploadData(Content, $"{domain}/ajaxm.php", Encoding.UTF8.GetBytes(data));
                     if (responseData != "")
                     {
@@ -52,9 +44,8 @@ namespace TEST
                 }
                 else if (password != "")
                 {
-                    string data = $"action=downprocess&sign={Regex.Match(page, "\\w*_c_c").Value}&ves=1&p={password}";
-                    byte[] postdata = Encoding.UTF8.GetBytes(data);
-                    string responseData = await UploadData(Content, $"{domain}/ajaxm.php", postdata);
+                    string data = $"action=downprocess&sign={RegexAll(page, "\\w*_c")}&ves=1&p={password}";
+                    string responseData = await UploadData(Content, $"{domain}/ajaxm.php", Encoding.UTF8.GetBytes(data));
                     if (responseData != "")
                     {
                         return await JsonDeserialize(responseData);
@@ -124,6 +115,19 @@ namespace TEST
                 return match.Success.ToString();
             }
             return match.Value;
+        }
+
+        private static string RegexAll(string page,string pattern)
+        {
+            string x = "";
+            foreach (Match m in Regex.Matches(page, pattern))
+            {
+                if (m.Length > 70)
+                {
+                    x = m.Value;
+                }
+            }
+            return x;
         }
 
         internal static async Task<string> DownloadString(string url)
