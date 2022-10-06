@@ -167,7 +167,7 @@ namespace TEST
                 string files = null;
                 for (int i = 0; i < Convert.ToInt32($"{lanzouJsonFolder["text"].Length}"); i++)
                 {
-                    files += $"文件名：{lanzouJsonFolder["text"][i]["name_all"]}\n大小：{lanzouJsonFolder["text"][i]["size"]}\n上传时间：{lanzouJsonFolder["text"][i]["time"]}\n链接：{domain}/{Regex.Match(lanzouJsonFolder["text"][i]["id"], "\\w*")}\n\n------------------------------------\n\n";
+                    files += $"文件名：{lanzouJsonFolder["text"][i]["name_all"]}\n大小：{lanzouJsonFolder["text"][i]["size"]}\n上传时间：{lanzouJsonFolder["text"][i]["time"]}\n链接：{domain}/{Regex.Match(lanzouJsonFolder["text"][i]["id"], "\\w*")}\n\n----------------------------------------------------\n\n";
                 }
                 return files;
             }
