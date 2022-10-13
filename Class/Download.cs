@@ -25,9 +25,51 @@ namespace TEST
                 }
                 return await 蓝奏云直链解析(domain, link.Replace($"&pwd={password}", ""), password);
             }
+            else if (link.Contains("123pan"))
+            {
+                string password = Regex.Match(link, "(?<=&pwd=).*").Value;
+                string ID = Regex.Replace(link.Replace($"&pwd={password}", ""), ".*/","");
+                if (link.EndsWith("&folder"))
+                {
+                   return await Ottpanfolder(ID.Replace("&folder", ""), password.Replace("&folder", ""));
+                }
+                return await Ottpan(ID, password);
+            }
             return "无法获取正确的链接对象...";
         }
-        
+
+        internal static async Task<string> Ottpan(string Content , string password = "")
+        {
+            string posturl = $"https://www.123pan.com/b/api/share/get?limit=100&next=1&orderBy=share_id&orderDirection=desc&shareKey={Content}&SharePwd={password}&ParentFileId=0&Page=1";
+            dynamic ottpanjson = Json.DeserializeObject(await DownloadString(posturl));
+            if ($"{ottpanjson["code"]}" == "0")
+            {
+                return await Get($"{ottpanjson["data"]["InfoList"][0]["DownloadUrl"]}&filename={ottpanjson["data"]["InfoList"][0]["FileName"]}");
+            }
+            return $"错误：{ottpanjson["message"]}";
+        }
+        internal static async Task<string> Ottpanfolder(string Content, string password = "")
+        {
+            string posturl = $"https://www.123pan.com/b/api/share/get?limit=100&next=1&orderBy=share_id&orderDirection=desc&shareKey={Content}&SharePwd={password}&ParentFileId=0&Page=1";
+            dynamic ottpanjson = Json.DeserializeObject(await DownloadString(posturl));
+            if ($"{ottpanjson["code"]}" == "0")
+            {
+                string folderindex = $"{ottpanjson["data"]["InfoList"][0]["FileId"]}";
+                string posturlfolder = $"https://www.123pan.com/b/api/share/get?limit=100&next=1&orderBy=share_id&orderDirection=desc&shareKey={Content}&SharePwd={password}&ParentFileId={folderindex}&Page=1";
+                dynamic ottpanjsonfolder = Json.DeserializeObject(await DownloadString(posturlfolder));
+                if ($"{ottpanjsonfolder["code"]}" == "0")
+                {
+                    string files = null;
+                    for (int i = 0; i < Convert.ToInt32($"{ottpanjsonfolder["data"]["InfoList"].Length}"); i++)
+                    {
+                        files += $"文件名：{ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}\n文件直链：{await Get($"{ottpanjsonfolder["data"]["InfoList"][i]["DownloadUrl"]}&filename={ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}")}\n\n----------------------------------------------------\n\n";
+                    }
+                    return files;
+                }
+                return $"错误：{ottpanjsonfolder["message"]}";
+            }
+            return $"错误：{ottpanjson["message"]}";
+        }
         internal static async Task<string> 蓝奏云直链解析(string domain ,string Content , string password = "")
         {
             string page = await DownloadString(Content);
