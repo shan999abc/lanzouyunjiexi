@@ -62,7 +62,10 @@ namespace TEST
                     string files = null;
                     for (int i = 0; i < Convert.ToInt32($"{ottpanjsonfolder["data"]["InfoList"].Length}"); i++)
                     {
-                        files += $"文件名：{ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}\n文件直链：{await Get($"{ottpanjsonfolder["data"]["InfoList"][i]["DownloadUrl"]}&filename={ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}")}\n\n----------------------------------------------------\n\n";
+                        if ($"{ottpanjsonfolder["data"]["InfoList"][i]["Status"]}" != "0")
+                        {
+                            files += $"文件名：{ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}\n文件直链：{await Get($"{ottpanjsonfolder["data"]["InfoList"][i]["DownloadUrl"]}&filename={ottpanjsonfolder["data"]["InfoList"][i]["FileName"]}")}\n\n----------------------------------------------------\n\n";
+                        }
                     }
                     return files;
                 }
