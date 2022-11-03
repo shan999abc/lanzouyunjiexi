@@ -4,7 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="蓝奏云解析DEMO-Made By: Godwhite" Height="450" Width="800" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
+        Title="云盘解析DEMO-Made By: Godwhite" Height="450" Width="800" ResizeMode="NoResize" WindowStartupLocation="CenterScreen">
     <Grid>
         <TextBox Name="textbox1" HorizontalAlignment="Left" Margin="15,90,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="310" Width="755" TextAlignment="Left" FontSize="16" FontWeight="Normal" Foreground="#FF966496" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" VerticalScrollBarVisibility="Visible" Background="{x:Null}">
             <UIElement.RenderTransform>
@@ -17,7 +17,7 @@
             </UIElement.RenderTransform>
         </TextBox>
         <Button Name="button" Content="开始解析" HorizontalAlignment="Left" Margin="640,26,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click" />
-        <TextBox Name="textbox2" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" TextAlignment="Left" FontSize="16" FontWeight="Normal" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Text="https://www.lanzouj.com/ibIPI0cg2y2h&amp;pwd=123" Foreground="#FFDC32DC" Background="{x:Null}">
+        <TextBox Name="textbox2" Text="https://www.lanzoue.com/iISiZ0e2prze&amp;pwd=123" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" TextAlignment="Left" FontSize="16" FontWeight="Normal" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Foreground="#FFDC32DC" Background="{x:Null}">
             <UIElement.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform />
