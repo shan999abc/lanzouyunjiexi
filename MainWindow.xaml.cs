@@ -16,7 +16,8 @@ namespace TEST
         {
             try
             {
-                textbox1.Text = await Download.关键字解析(textbox2.Text);
+                textbox1.Text = await Sht.云盘解析.关键字解析(textbox2.Text);
+
                 textbox1.ScrollToHome();
             }
             catch (Exception ex)

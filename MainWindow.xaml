@@ -17,7 +17,7 @@
             </UIElement.RenderTransform>
         </TextBox>
         <Button Name="button" Content="开始解析" HorizontalAlignment="Left" Margin="640,26,0,0" VerticalAlignment="Top" Height="34" Width="130" Click="Button_Click" />
-        <TextBox Name="textbox2" Text="https://www.lanzoue.com/iISiZ0e2prze&amp;pwd=123" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" TextAlignment="Left" FontSize="16" FontWeight="Normal" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Foreground="#FFDC32DC" Background="{x:Null}">
+        <TextBox Name="textbox2" Text="https://www.lanzoue.com/iLsZO0j78v8j" HorizontalAlignment="Left" Margin="15,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Height="40" Width="590" TextAlignment="Left" FontSize="16" FontWeight="Normal" FlowDirection="LeftToRight" FontStretch="Medium" RenderTransformOrigin="0.5,0.5" Foreground="#FFDC32DC" Background="{x:Null}">
             <UIElement.RenderTransform>
                 <TransformGroup>
                     <ScaleTransform />

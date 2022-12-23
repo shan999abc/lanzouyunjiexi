@@ -78,7 +78,9 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Class\Download.cs" />
+    <Compile Include="Class\云盘解析.cs" />
+    <Compile Include="Class\Json.cs" />
+    <Compile Include="Class\WebClient.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
